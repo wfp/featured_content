@@ -1,0 +1,20 @@
+status: true
+dependencies:
+  config:
+    - field.storage.featured_content.term
+  module:
+    - featured_content
+id: featured_content.featured_content.term
+field_name: term
+entity_type: featured_content
+bundle: featured_content
+label: 'Taxonomy term'
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings: {  }
+field_type: entity_reference

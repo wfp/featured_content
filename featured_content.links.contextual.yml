@@ -1,0 +1,4 @@
+featured_content.edit:
+  title: 'Edit content'
+  group: 'featured_content'
+  route_name: 'featured_content.edit_content'

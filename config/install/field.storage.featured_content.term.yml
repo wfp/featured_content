@@ -1,0 +1,16 @@
+status: true
+dependencies: {  }
+id: featured_content.term
+field_name: term
+entity_type: featured_content
+type: entity_reference
+settings:
+  target_type: taxonomy_term
+module: featured_content
+locked: false
+cardinality: 1
+indexes:
+  target_id:
+    - target_id
+persist_with_no_fields: false
+custom_storage: false

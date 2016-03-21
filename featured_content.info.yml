@@ -1,0 +1,7 @@
+name: Featured Content
+type: module
+description: Featured content module.
+core: 8.x
+package: Custom
+dependencies:
+  - taxonomy

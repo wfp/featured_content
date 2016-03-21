@@ -1,0 +1,6 @@
+services:
+  cache_context.route.taxonomy_term:
+    class: Drupal\featured_content\Cache\TaxonomyTermRouteCacheContext
+    arguments: ['@current_route_match']
+    tags:
+      - { name: cache.context}

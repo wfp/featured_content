@@ -1,0 +1,5 @@
+featured_content.ui:
+  title: 'Featured content'
+  parent: system.admin_structure
+  description: 'Configure Featured Content settings.'
+  route_name: featured_content.ui

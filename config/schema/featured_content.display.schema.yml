@@ -1,0 +1,22 @@
+# Schema for the featured_content display plugins.
+
+views.display.featured_content_block:
+  type: views_display
+  label: 'Featured content block display options'
+  mapping:
+    block_description:
+      type: label
+      label: 'Block name'
+    block_category:
+      type: text
+      label: 'Block category'
+    block_hide_empty:
+      type: boolean
+      label: 'Hide block if no result/empty text'
+    allow:
+      type: mapping
+      label: 'Allow'
+      mapping:
+        items_per_page:
+          type: boolean
+          label: 'Items per page'

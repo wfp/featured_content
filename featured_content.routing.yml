@@ -1,0 +1,15 @@
+featured_content.ui:
+  path: '/admin/structure/featured-content'
+  defaults:
+    _controller: '\Drupal\featured_content\Controller\FeaturedContentAdmin::overview'
+    _title: 'Featured content'
+  requirements:
+    _permission: 'administer site configuration'
+featured_content.edit_content:
+  path: '/featured-content/{block}/{taxonomy_term}'
+  defaults:
+    _entity_form: 'featured_content.default'
+    _title: 'Edit content'
+  requirements:
+    _permission: 'feature content'
+

@@ -1,0 +1,9 @@
+uuid: a3c0edc7-0181-470d-bf00-c8b03f7e52d8
+langcode: en
+status: true
+dependencies: {  }
+name: Topics
+vid: test_topics
+description: 'Topics classification.'
+hierarchy: 0
+weight: 0

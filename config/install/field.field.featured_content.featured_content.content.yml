@@ -1,0 +1,20 @@
+status: true
+dependencies:
+  config:
+    - field.storage.featured_content.content
+  module:
+    - featured_content
+id: featured_content.featured_content.content
+field_name: content
+entity_type: featured_content
+bundle: featured_content
+label: Content
+description: ''
+required: true
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default'
+  handler_settings: {  }
+field_type: entity_reference

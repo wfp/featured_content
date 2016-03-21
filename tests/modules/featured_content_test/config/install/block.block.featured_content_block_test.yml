@@ -1,0 +1,29 @@
+uuid: 976f4fff-c23b-43da-9f00-f19bb90a1e0e
+langcode: en
+status: true
+dependencies:
+  config:
+    - views.view.featured_content_test
+  module:
+    - views
+  theme:
+    - bartik
+id: featured_content_block_test
+theme: bartik
+region: content
+weight: -8
+provider: null
+plugin: 'views_block:featured_content_test-block_1'
+settings:
+  id: 'views_block:featured_content_test-block_1'
+  label: 'FooBarBaz'
+  provider: views
+  label_display: visible
+  views_label: 'FooBarBaz'
+  items_per_page: none
+visibility:
+  request_path:
+    id: request_path
+    pages: '/taxonomy/term/*'
+    negate: false
+    context_mapping: {  }

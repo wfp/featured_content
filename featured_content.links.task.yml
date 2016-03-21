@@ -1,0 +1,4 @@
+featured_content.ui:
+  title: 'Overview'
+  route_name: featured_content.ui
+  base_route: featured_content.ui

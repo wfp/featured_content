@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * @file
+ * Contains featured_content.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Block\BlockPluginInterface;
+
+/**
+ * Implements hook_help().
+ */
+function featured_content_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the featured_content module.
+    case 'help.page.featured_content':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Featured content module allows user grated with specific permissions to feature content items by placing and ordering them inside different blocks..') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_block_view_alter().
+ */
+function featured_content_block_view_alter(array &$build, BlockPluginInterface $block) {
+  $definition = $block->getPluginDefinition();
+  if (($definition['id'] === 'views_block') && ($definition['provider'] === 'views')) {
+    $configuration = $block->getConfiguration();
+    if (!empty($configuration['featured_content_display_plugin_id'])) {
+      $route_match = \Drupal::routeMatch();
+      // This contextual link is available only on taxonomy term page.
+      if ($route_match->getRouteName() == 'entity.taxonomy_term.canonical') {
+        if ($taxonomy_term_id = $route_match->getRawParameter('taxonomy_term')) {
+          // Add contextual link.
+          $build['#contextual_links']['featured_content'] = [
+            'route_parameters' => [
+              'block' => $build['#block']->id(),
+              'taxonomy_term' => $taxonomy_term_id,
+            ],
+          ];
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_config_schema_info_alter().
+ */
+function featured_content_config_schema_info_alter(&$definitions) {
+  $definitions['views_block']['mapping']['featured_content_display_plugin_id'] = [
+    'type' => 'string',
+    'label' => 'Display plugin id',
+  ];
+}
