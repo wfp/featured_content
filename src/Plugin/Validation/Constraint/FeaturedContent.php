@@ -18,7 +18,7 @@ use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
  *   type = "entity"
  * )
  */
-class FeaturedContent extends CompositeConstraintBase  {
+class FeaturedContent extends CompositeConstraintBase {
 
   /**
    * Duplicate validation error message.

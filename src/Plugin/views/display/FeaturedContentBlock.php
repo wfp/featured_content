@@ -78,10 +78,10 @@ class FeaturedContentBlock extends Block {
    */
   public function blockSettings(array $settings) {
     return parent::blockSettings($settings) + [
-      // There's no way to access the view and the display from the block. We
-      // store the display plugin id in block settings to be used later by the
-      // block plugin for identifying this display plugin.
-      // @see featured_content_block_view_alter()
+      // There's no way to access the view and the display from the block.
+      // We store the display plugin id in block settings to be used later by
+      // the block plugin for identifying this display plugin.
+      // @see featured_content_block_view_alter().
       'featured_content_display_plugin_id' => $this->getPluginDefinition()['id'],
     ];
   }
@@ -90,17 +90,20 @@ class FeaturedContentBlock extends Block {
    * {@inheritdoc}
    */
   public function query() {
-    if (empty($term_id = $this->getTaxonomyTermContext())) {
-      $this->view->query->addWhereExpression(0, '1 = 2');
-      return;
-    }
-    $plugin_id = $this->getBlockPluginId();
-    if (!$featured_content = FeaturedContent::loadByContext($plugin_id, $term_id)) {
+    $term_id = $this->getTaxonomyTermContext();
+    if (empty($term_id)) {
       $this->view->query->addWhereExpression(0, '1 = 2');
       return;
     }
 
-    /** @var \Drupal\views\Plugin\views\query\Sql $query */
+    $plugin_id = $this->getBlockPluginId();
+    $featured_content = FeaturedContent::loadByContext($plugin_id, $term_id);
+    if (!$featured_content) {
+      $this->view->query->addWhereExpression(0, '1 = 2');
+      return;
+    }
+
+    /* @var \Drupal\views\Plugin\views\query\Sql $query */
     $query = $this->view->query;
 
     $configuration = [
@@ -111,7 +114,7 @@ class FeaturedContentBlock extends Block {
       'left_field' => $this->view->storage->get('base_field'),
       'operator' => '=',
     ];
-    /** @var \Drupal\views\Plugin\views\join\Standard $join */
+    /* @var \Drupal\views\Plugin\views\join\Standard $join */
     $join = Views::pluginManager('join')->createInstance('standard', $configuration);
     $query->addRelationship('fcc', $join, 'featured_content__content');
 
@@ -127,7 +130,7 @@ class FeaturedContentBlock extends Block {
     // This block cache should be cleared when the corresponding featured
     // content entity is saved.
     // @todo The tag is correctly added to block render cache but the cache is
-    //   not invalidated. Why?
+    // not invalidated. Why?
     $this->display['cache_metadata']['tags'][] = "featured_content:{$featured_content->id()}";
     $this->display['cache_metadata']['contexts'][] = 'route.taxonomy_term';
   }
@@ -153,6 +156,7 @@ class FeaturedContentBlock extends Block {
    * Returns the block plugin id of this display.
    *
    * @return string
+   *    Block plugin ID.
    */
   protected function getBlockPluginId() {
     return 'views_block:' . $this->view->storage->id() . '-' . $this->display['id'];

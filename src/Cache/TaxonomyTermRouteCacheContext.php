@@ -30,6 +30,7 @@ class TaxonomyTermRouteCacheContext extends RouteCacheContext {
     if ($this->routeMatch->getRouteName() !== 'entity.taxonomy_term.canonical') {
       return '0';
     }
+
     return (string) ((int) $this->routeMatch->getRawParameter('taxonomy_term'));
   }
 

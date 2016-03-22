@@ -35,7 +35,8 @@ function featured_content_block_view_alter(array &$build, BlockPluginInterface $
       $route_match = \Drupal::routeMatch();
       // This contextual link is available only on taxonomy term page.
       if ($route_match->getRouteName() == 'entity.taxonomy_term.canonical') {
-        if ($taxonomy_term_id = $route_match->getRawParameter('taxonomy_term')) {
+        $taxonomy_term_id = $route_match->getRawParameter('taxonomy_term');
+        if ($taxonomy_term_id) {
           // Add contextual link.
           $build['#contextual_links']['featured_content'] = [
             'route_parameters' => [

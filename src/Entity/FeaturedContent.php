@@ -112,9 +112,11 @@ class FeaturedContent extends ContentEntityBase {
       ->condition('block_plugin', $block_plugin_id)
       ->condition('term.target_id', $taxonomy_term_id)
       ->execute();
-    if (!$id = reset($ids)) {
+    $id = reset($ids);
+    if (!$id) {
       return NULL;
     }
+
     return FeaturedContent::load($id);
   }
 

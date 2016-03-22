@@ -28,7 +28,18 @@ class FeaturedContentEntityTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['featured_content', 'featured_content_test', 'taxonomy', 'text', 'block', 'node', 'field', 'user', 'system', 'views'];
+  public static $modules = [
+    'featured_content',
+    'featured_content_test',
+    'taxonomy',
+    'text',
+    'block',
+    'node',
+    'field',
+    'user',
+    'system',
+    'views',
+  ];
 
   /**
    * Tests 'featured_content' entity CRUD ops.
@@ -76,7 +87,7 @@ class FeaturedContentEntityTest extends KernelTestBase {
     $user = User::create(['name' => 'jdoe', 'status' => TRUE]);
     $user->save();
 
-    /** @var \Drupal\block\BlockInterface $block */
+    /* @var \Drupal\block\BlockInterface $block */
     $block = Block::load('featured_content_block_test');
 
     $entities = [];
@@ -86,7 +97,7 @@ class FeaturedContentEntityTest extends KernelTestBase {
       $entities[$i] = $entity;
     }
 
-    /** @var \Drupal\featured_content\Entity\FeaturedContent $relation */
+    /* @var \Drupal\featured_content\Entity\FeaturedContent $relation */
     $relation = FeaturedContent::create();
     $relation->uid = $user;
     $relation->term = $term;
@@ -111,7 +122,6 @@ class FeaturedContentEntityTest extends KernelTestBase {
     }
 
     // Test entity validation.
-
     // Duplicate relation.
     $relation_duplicate = clone $relation;
     // Prevent id collision.

@@ -9,6 +9,11 @@ namespace Drupal\featured_content\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 
+/**
+ * Class FeaturedContentAdmin.
+ *
+ * @package Drupal\featured_content\Controller
+ */
 class FeaturedContentAdmin extends ControllerBase {
 
   /**
@@ -23,7 +28,7 @@ class FeaturedContentAdmin extends ControllerBase {
         '#theme' => 'item_list',
         '#items' => [
           $this->t('Configure the type of entities that can be featured from Manage fields > Content > Edit'),
-        ]
+        ],
       ],
     ];
   }

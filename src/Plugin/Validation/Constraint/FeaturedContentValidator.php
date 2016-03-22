@@ -67,14 +67,14 @@ class FeaturedContentValidator extends ConstraintValidator implements ContainerI
    * {@inheritdoc}
    */
   public function validate($entity, Constraint $constraint) {
-    /** @var \Drupal\featured_content\Entity\FeaturedContent $entity */
+    /* @var \Drupal\featured_content\Entity\FeaturedContent $entity */
     if (!isset($entity)) {
       return;
     }
 
-    /** @var \Drupal\featured_content\Plugin\Validation\Constraint\FeaturedContent $constraint */
+    /* @var \Drupal\featured_content\Plugin\Validation\Constraint\FeaturedContent $constraint */
 
-    /** @var \Drupal\Core\Block\BlockPluginInterface $block_plugin */
+    /* @var \Drupal\Core\Block\BlockPluginInterface $block_plugin */
     $block_plugin = $this->blockManager->createInstance($entity->block_plugin->value);
 
     // Validate the block plugin. Should be a Views block based on
@@ -83,6 +83,7 @@ class FeaturedContentValidator extends ConstraintValidator implements ContainerI
     if (($definition['id'] !== 'views_block') || ($definition['provider'] !== 'views')) {
       $this->context->addViolation($constraint->notViewsBlock, ['@block' => $entity->block_plugin->value]);
     }
+
     $configuration = $block_plugin->getConfiguration();
     if (empty($configuration['featured_content_display_plugin_id'])) {
       $this->context->addViolation($constraint->invalidBlockViewsDisplay, ['@block' => $entity->block_plugin->value]);

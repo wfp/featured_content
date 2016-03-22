@@ -15,7 +15,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\featured_content\Entity\FeaturedContent;
 use Drupal\taxonomy\Entity\Term;
-use Lurker\Exception\InvalidArgumentException;
+use Psr\Log\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\InvalidParameterException;
 
@@ -58,11 +58,14 @@ class FeaturedContentForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function getEntityFromRouteMatch(RouteMatchInterface $route_match, $entity_type_id) {
-    if (($block_id = $route_match->getRawParameter('block')) === NULL) {
+    $block_id = $route_match->getRawParameter('block');
+    if ($block_id === NULL) {
       throw new InvalidParameterException('Block not passed in the URL.');
     }
-    /** @var \Drupal\block\BlockInterface $block */
-    if (empty($block = Block::load($block_id))) {
+
+    /* @var \Drupal\block\BlockInterface $block */
+    $block = Block::load($block_id);
+    if (empty($block)) {
       throw new InvalidParameterException("Invalid block: '$block_id'.");
     }
 
@@ -71,26 +74,32 @@ class FeaturedContentForm extends ContentEntityForm {
     if (($definition['id'] !== 'views_block') || ($definition['provider'] !== 'views')) {
       throw new InvalidArgumentException("The block '$block_id' is not a Views block.");
     }
+
     $configuration = $block_plugin->getConfiguration();
     if (empty($configuration['featured_content_display_plugin_id'])) {
       throw new InvalidParameterException("The block '$block_id' should use the Views 'Featured Content' display type.");
     }
 
-    if (($term_id = $route_match->getRawParameter('taxonomy_term')) === NULL) {
+    $term_id = $route_match->getRawParameter('taxonomy_term');
+    if ($term_id === NULL) {
       throw new InvalidParameterException('Taxonomy term not passed in the URL.');
     }
-    if (empty($taxonomy_term = Term::load($term_id))) {
+
+    $taxonomy_term = Term::load($term_id);
+    if (empty($taxonomy_term)) {
       throw new InvalidParameterException("Invalid taxonomy term: '$term_id'.");
     }
 
     $plugin_id = $block_plugin->getPluginId();
-    if (!$featured_content = FeaturedContent::loadByContext($plugin_id, $term_id)) {
+    $featured_content = FeaturedContent::loadByContext($plugin_id, $term_id);
+    if (!$featured_content) {
       $featured_content = FeaturedContent::create([
         'block_plugin' => $plugin_id,
         'term' => $term_id,
         'uid' => $this->currentUser()->id(),
       ]);
     }
+
     return $featured_content;
   }
 
