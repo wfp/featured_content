@@ -12,3 +12,5 @@ featured_content.edit_content:
     _title: 'Edit content'
   requirements:
     _permission: 'feature content'
+  options:
+    _admin_route: TRUE
