@@ -66,13 +66,16 @@ class FeaturedContentForm extends ContentEntityForm {
     preg_match_all('/views_block:(.*)-(.*)/', $block_id, $matches);
     $view_id = isset($matches[1][0]) ? $matches[1][0] : NULL;
     $display_id = isset($matches[2][0]) ? $matches[2][0] : NULL;
+
     $view = Views::getView($view_id);
     if (!$view) {
       throw new InvalidArgumentException("View not found: '$view_id'.");
     }
+
     if (!$view->setDisplay($display_id)) {
       throw new InvalidArgumentException("View display not found: '$view_id.$display_id'.");
     }
+
     if ($view->getDisplay()->getPluginId() != 'featured_content_block') {
       throw new InvalidParameterException("The block '$block_id' should use the Views 'Featured Content' display type.");
     }
@@ -87,7 +90,8 @@ class FeaturedContentForm extends ContentEntityForm {
       throw new InvalidParameterException("Invalid taxonomy term: '$term_id'.");
     }
 
-    if (!$featured_content = FeaturedContent::loadByContext($block_id, $term_id)) {
+    $featured_content = FeaturedContent::loadByContext($block_id, $term_id);
+    if (!$featured_content) {
       $featured_content = FeaturedContent::create([
         'block_plugin' => $block_id,
         'term' => $term_id,
