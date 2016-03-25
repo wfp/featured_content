@@ -40,7 +40,7 @@ function featured_content_block_view_alter(array &$build, BlockPluginInterface $
           // Add contextual link.
           $build['#contextual_links']['featured_content'] = [
             'route_parameters' => [
-              'block' => $build['#block']->id(),
+              'block' => $configuration['id'],
               'taxonomy_term' => $taxonomy_term_id,
             ],
           ];

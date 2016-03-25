@@ -7,7 +7,6 @@
 
 namespace Drupal\featured_content\Form;
 
-use Drupal\block\Entity\Block;
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
@@ -15,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\featured_content\Entity\FeaturedContent;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\views\Views;
 use Psr\Log\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Exception\InvalidParameterException;
@@ -63,20 +63,17 @@ class FeaturedContentForm extends ContentEntityForm {
       throw new InvalidParameterException('Block not passed in the URL.');
     }
 
-    /* @var \Drupal\block\BlockInterface $block */
-    $block = Block::load($block_id);
-    if (empty($block)) {
-      throw new InvalidParameterException("Invalid block: '$block_id'.");
+    preg_match_all('/views_block:(.*)-(.*)/', $block_id, $matches);
+    $view_id = isset($matches[1][0]) ? $matches[1][0] : NULL;
+    $display_id = isset($matches[2][0]) ? $matches[2][0] : NULL;
+    $view = Views::getView($view_id);
+    if (!$view) {
+      throw new InvalidArgumentException("View not found: '$view_id'.");
     }
-
-    $block_plugin = $block->getPlugin();
-    $definition = $block_plugin->getPluginDefinition();
-    if (($definition['id'] !== 'views_block') || ($definition['provider'] !== 'views')) {
-      throw new InvalidArgumentException("The block '$block_id' is not a Views block.");
+    if (!$view->setDisplay($display_id)) {
+      throw new InvalidArgumentException("View display not found: '$view_id.$display_id'.");
     }
-
-    $configuration = $block_plugin->getConfiguration();
-    if (empty($configuration['featured_content_display_plugin_id'])) {
+    if ($view->getDisplay()->getPluginId() != 'featured_content_block') {
       throw new InvalidParameterException("The block '$block_id' should use the Views 'Featured Content' display type.");
     }
 
@@ -90,11 +87,9 @@ class FeaturedContentForm extends ContentEntityForm {
       throw new InvalidParameterException("Invalid taxonomy term: '$term_id'.");
     }
 
-    $plugin_id = $block_plugin->getPluginId();
-    $featured_content = FeaturedContent::loadByContext($plugin_id, $term_id);
-    if (!$featured_content) {
+    if (!$featured_content = FeaturedContent::loadByContext($block_id, $term_id)) {
       $featured_content = FeaturedContent::create([
-        'block_plugin' => $plugin_id,
+        'block_plugin' => $block_id,
         'term' => $term_id,
         'uid' => $this->currentUser()->id(),
       ]);
