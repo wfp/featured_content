@@ -106,21 +106,28 @@ class FeaturedContentBlock extends Block {
     /* @var \Drupal\views\Plugin\views\query\Sql $query */
     $query = $this->view->query;
 
+    $base_table = $this->view->storage->get('base_table');
+    $join_field = ($base_table == 'featured_content') ? 'entity_id' : 'content_target_id';
+
     $configuration = [
-      'type' => 'INNER',
+      'type' => 'LEFT',
       'table' => 'featured_content__content',
-      'field' => 'content_target_id',
+      'field' => $join_field,
       'left_table' => $this->view->storage->get('base_table'),
       'left_field' => $this->view->storage->get('base_field'),
       'operator' => '=',
     ];
     /* @var \Drupal\views\Plugin\views\join\Standard $join */
     $join = Views::pluginManager('join')->createInstance('standard', $configuration);
-    $query->addRelationship('fcc', $join, 'featured_content__content');
 
-    $query->addWhere(0, 'fcc.entity_id', $featured_content->id());
-    $query->addWhere(0, 'fcc.deleted', 0);
-    $query->addField('fcc', 'delta', 'featured_content_weight');
+    // Naming the relation "featured_content__content" ensure no duplication
+    // in case the same relation is included by field handlers later in the
+    // query building process.
+    $query->addRelationship('featured_content__content', $join, 'featured_content__content');
+
+    $query->addWhere(0, 'featured_content__content.entity_id', $featured_content->id());
+    $query->addWhere(0, 'featured_content__content.deleted', 0);
+    $query->addField('featured_content__content', 'delta', 'featured_content_weight');
     // We want to add our orderBy at the top.
     $query->orderby = array_merge(
       [['field' => 'featured_content_weight', 'direction' => 'ASC']],
