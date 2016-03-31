@@ -90,14 +90,16 @@ class FeaturedContentBlock extends Block {
    * {@inheritdoc}
    */
   public function query() {
-    $term_id = $this->getTaxonomyTermContext();
-    if (empty($term_id)) {
+    /** @var \Drupal\taxonomy\TermInterface $term */
+    $term = $this->currentRouteMatch->getParameter('taxonomy_term');
+    if (empty($term)) {
       $this->view->query->addWhereExpression(0, '1 = 2');
       return;
     }
 
-    $plugin_id = $this->getBlockPluginId();
-    $featured_content = FeaturedContent::loadByContext($plugin_id, $term_id);
+    $plugin_id = 'views_block:' . $this->view->storage->id() . '-' . $this->display['id'];
+
+    $featured_content = FeaturedContent::loadByContext($plugin_id, $term->id());
     if (!$featured_content) {
       $this->view->query->addWhereExpression(0, '1 = 2');
       return;
@@ -113,16 +115,16 @@ class FeaturedContentBlock extends Block {
       'type' => 'LEFT',
       'table' => 'featured_content__content',
       'field' => $join_field,
-      'left_table' => $this->view->storage->get('base_table'),
+      'left_table' => $base_table,
       'left_field' => $this->view->storage->get('base_field'),
       'operator' => '=',
     ];
     /* @var \Drupal\views\Plugin\views\join\Standard $join */
     $join = Views::pluginManager('join')->createInstance('standard', $configuration);
 
-    // Naming the relation "featured_content__content" ensure no duplication
-    // in case the same relation is included by field handlers later in the
-    // query building process.
+    // Naming the relation "featured_content__content" ensure no duplication in
+    // case the same relation is included by field handlers later in the query
+    // building process.
     $query->addRelationship('featured_content__content', $join, 'featured_content__content');
 
     $query->addWhere(0, 'featured_content__content.entity_id', $featured_content->id());
@@ -136,37 +138,8 @@ class FeaturedContentBlock extends Block {
 
     // This block cache should be cleared when the corresponding featured
     // content entity is saved.
-    // @todo The tag is correctly added to block render cache but the cache is
-    // not invalidated. Why?
     $this->display['cache_metadata']['tags'][] = "featured_content:{$featured_content->id()}";
     $this->display['cache_metadata']['contexts'][] = 'route.taxonomy_term';
-  }
-
-  /**
-   * Gets the taxonomy term context.
-   *
-   * @return int|null
-   *   The taxonomy term id or NULL if we're not on context.
-   */
-  protected function getTaxonomyTermContext() {
-    $route_name = $this->currentRouteMatch->getRouteName();
-
-    // We are only showing this block on taxonomy term page.
-    if ($route_name != 'entity.taxonomy_term.canonical') {
-      return NULL;
-    }
-
-    return $this->currentRouteMatch->getRawParameter('taxonomy_term');
-  }
-
-  /**
-   * Returns the block plugin id of this display.
-   *
-   * @return string
-   *    Block plugin ID.
-   */
-  protected function getBlockPluginId() {
-    return 'views_block:' . $this->view->storage->id() . '-' . $this->display['id'];
   }
 
 }

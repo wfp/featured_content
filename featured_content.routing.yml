@@ -6,11 +6,17 @@ featured_content.ui:
   requirements:
     _permission: 'administer site configuration'
 featured_content.edit_content:
-  path: '/featured-content/{block}/{taxonomy_term}'
+  path: '/featured-content/{views_block_plugin}/{taxonomy_term}'
   defaults:
     _entity_form: 'featured_content.default'
     _title: 'Edit content'
   requirements:
     _permission: 'feature content'
+    taxonomy_term: \d+
   options:
     _admin_route: TRUE
+    parameters:
+      views_block_plugin:
+        type: views_block_plugin
+      taxonomy_term:
+        type: 'entity:taxonomy_term'
