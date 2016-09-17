@@ -77,6 +77,7 @@ function featured_content_featured_content_type_insert(EntityInterface $type) {
         'field_storage' => $field_storage,
         'bundle' => $type->id(),
         'label' => $definition['label'],
+        'required' => $definition['required'],
         'settings' => $definition['settings'],
       ]);
       $field->save();
@@ -106,6 +107,7 @@ function featured_content_get_field_definition() {
   return [
     'term' => [
       'label' => t('Taxonomy term'),
+      'required' => TRUE,
       'settings' => [
         'handler' => 'default:taxonomy_term',
         'handler_settings' => [],
@@ -113,6 +115,7 @@ function featured_content_get_field_definition() {
     ],
     'content' => [
       'label' => t('Content'),
+      'required' => TRUE,
       'settings' => [
         'handler' => 'default',
         'handler_settings' => [],
