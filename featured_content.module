@@ -5,8 +5,13 @@
  * Contains featured_content.module.
  */
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Block\BlockPluginInterface;
+use Drupal\featured_content\Entity\FeaturedContentType;
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
 
 /**
  * Implements hook_help().
@@ -31,17 +36,17 @@ function featured_content_block_view_alter(array &$build, BlockPluginInterface $
   $definition = $block->getPluginDefinition();
   if (($definition['id'] === 'views_block') && ($definition['provider'] === 'views')) {
     $configuration = $block->getConfiguration();
-    if (!empty($configuration['featured_content_display_plugin_id'])) {
+    if (!empty($configuration['featured_content_type']) && ($type = FeaturedContentType::load($configuration['featured_content_type']))) {
       $route_match = \Drupal::routeMatch();
       // This contextual link is available only on taxonomy term page.
       if ($route_match->getRouteName() == 'entity.taxonomy_term.canonical') {
-        $taxonomy_term_id = $route_match->getRawParameter('taxonomy_term');
-        if ($taxonomy_term_id) {
+        if ($term = $route_match->getParameter('taxonomy_term')) {
           // Add contextual link.
           $build['#contextual_links']['featured_content'] = [
             'route_parameters' => [
+              'featured_content_type' => $type->id(),
               'views_block_plugin' => $configuration['id'],
-              'taxonomy_term' => $taxonomy_term_id,
+              'taxonomy_term' => $term->id(),
             ],
           ];
         }
@@ -54,8 +59,64 @@ function featured_content_block_view_alter(array &$build, BlockPluginInterface $
  * Implements hook_config_schema_info_alter().
  */
 function featured_content_config_schema_info_alter(&$definitions) {
-  $definitions['views_block']['mapping']['featured_content_display_plugin_id'] = [
+  $definitions['views_block']['mapping']['featured_content_type'] = [
     'type' => 'string',
-    'label' => 'Display plugin id',
+    'label' => 'Feature content type',
+  ];
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for featured_content_type entities.
+ */
+function featured_content_featured_content_type_insert(EntityInterface $type) {
+  foreach (featured_content_get_field_definition() as $id => $definition) {
+    $field_storage = FieldStorageConfig::loadByName('featured_content', $id);
+    $field = FieldConfig::loadByName('featured_content', $type->id(), $id);
+    if (empty($field)) {
+      $field = FieldConfig::create([
+        'field_storage' => $field_storage,
+        'bundle' => $type->id(),
+        'label' => $definition['label'],
+        'settings' => $definition['settings'],
+      ]);
+      $field->save();
+    }
+  }
+
+  $display = EntityFormDisplay::load("featured_content.{$type->id()}.default");
+  if (!$display) {
+    $display = EntityFormDisplay::create([
+      'targetEntityType' => 'featured_content',
+      'bundle' => $type->id(),
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  $display
+    ->setComponent('content', ['type' => 'entity_reference_autocomplete'])
+    ->save();
+}
+
+/**
+ * Provides initial field config definitions.
+ *
+ * @return array
+ */
+function featured_content_get_field_definition() {
+  return [
+    'term' => [
+      'label' => t('Taxonomy term'),
+      'settings' => [
+        'handler' => 'default:taxonomy_term',
+        'handler_settings' => [],
+      ],
+    ],
+    'content' => [
+      'label' => t('Content'),
+      'settings' => [
+        'handler' => 'default',
+        'handler_settings' => [],
+      ],
+    ],
   ];
 }

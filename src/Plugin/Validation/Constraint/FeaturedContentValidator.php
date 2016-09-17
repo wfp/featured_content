@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\Plugin\Validation\Constraint\FeaturedContentValidator.
- */
-
 namespace Drupal\featured_content\Plugin\Validation\Constraint;
 
 use Drupal\Core\Block\BlockManagerInterface;
@@ -85,12 +80,13 @@ class FeaturedContentValidator extends ConstraintValidator implements ContainerI
     }
 
     $configuration = $block_plugin->getConfiguration();
-    if (empty($configuration['featured_content_display_plugin_id'])) {
+    if (empty($configuration['featured_content_type'])) {
       $this->context->addViolation($constraint->invalidBlockViewsDisplay, ['@block' => $entity->block_plugin->value]);
     }
 
     // Validate relation uniqueness.
     $ids = $this->queryFactory->get('featured_content')
+      ->condition('type', $entity->bundle())
       ->condition('term.target_id', $entity->term->target_id)
       ->condition('block_plugin', $entity->block_plugin->value)
       ->condition('id', $entity->id(), '<>')

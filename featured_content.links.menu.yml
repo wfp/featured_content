@@ -1,5 +1,5 @@
-featured_content.ui:
+entity.featured_content_type.collection:
   title: 'Featured content'
   parent: system.admin_structure
   description: 'Configure Featured Content settings.'
-  route_name: featured_content.ui
+  route_name: entity.featured_content_type.collection

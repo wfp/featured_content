@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\Entity\FeaturedContent.
- */
-
 namespace Drupal\featured_content\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
@@ -20,6 +15,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  *   label = @Translation("Featured content relation"),
  *   entity_keys = {
  *     "id" = "id",
+ *     "bundle" = "type",
  *     "uuid" = "uuid",
  *     "uid" = "uid"
  *   },
@@ -31,7 +27,9 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
  *       "default" = "\Drupal\featured_content\Form\FeaturedContentForm",
  *     },
  *   },
- *   field_ui_base_route = "featured_content.ui",
+ *   bundle_entity_type = "featured_content_type",
+ *   bundle_label = @Translation("Featured content type"),
+ *   field_ui_base_route = "entity.featured_content_type.edit_form",
  *   constraints = {
  *     "FeaturedContent" = {}
  *   },
@@ -43,18 +41,7 @@ class FeaturedContent extends ContentEntityBase {
    * {@inheritdoc}
    */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
-    $fields = [];
-
-    $fields['id'] = BaseFieldDefinition::create('integer')
-      ->setLabel(t('ID'))
-      ->setDescription(t('The relation ID.'))
-      ->setReadOnly(TRUE)
-      ->setSetting('unsigned', TRUE);
-
-    $fields['uuid'] = BaseFieldDefinition::create('uuid')
-      ->setLabel(t('UUID'))
-      ->setDescription(t('The relation UUID.'))
-      ->setReadOnly(TRUE);
+    $fields = parent::baseFieldDefinitions($entity_type);
 
     $fields['uid'] = BaseFieldDefinition::create('entity_reference')
       ->setLabel(t('Featured by'))
@@ -99,6 +86,8 @@ class FeaturedContent extends ContentEntityBase {
   /**
    * Loads a featured_content entity by its block plugin and taxonomy term ids.
    *
+   * @param string $type
+   *   The entity type.
    * @param string $block_plugin_id
    *   The block plugin id.
    * @param int $taxonomy_term_id
@@ -107,8 +96,9 @@ class FeaturedContent extends ContentEntityBase {
    * @return \Drupal\featured_content\Entity\FeaturedContent|null
    *   The entity or NULL.
    */
-  public static function loadByContext($block_plugin_id, $taxonomy_term_id) {
+  public static function loadByContext($type, $block_plugin_id, $taxonomy_term_id) {
     $ids = \Drupal::entityQuery('featured_content')
+      ->condition('type', $type)
       ->condition('block_plugin', $block_plugin_id)
       ->condition('term.target_id', $taxonomy_term_id)
       ->execute();
@@ -116,7 +106,6 @@ class FeaturedContent extends ContentEntityBase {
     if (!$id) {
       return NULL;
     }
-
     return FeaturedContent::load($id);
   }
 

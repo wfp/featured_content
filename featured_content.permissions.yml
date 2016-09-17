@@ -1,2 +1,4 @@
 feature content:
   title: 'Feature content'
+administer featured content:
+  title: 'Administer featured content'

@@ -1,0 +1,5 @@
+featured_content.type_add:
+  route_name: feature_content.type_add
+  title: 'New type'
+  appears_on:
+    - entity.featured_content_type.collection

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\Plugin\Validation\Constraint\FeaturedContent.
- */
-
 namespace Drupal\featured_content\Plugin\Validation\Constraint;
 
 use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;

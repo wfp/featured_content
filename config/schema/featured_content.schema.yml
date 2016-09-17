@@ -1,0 +1,23 @@
+# Schema for the featured_content module.
+
+featured_content.type.*:
+  type: config_entity
+  label: 'Featured content type'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readable name'
+    label:
+      type: label
+      label: 'Label'
+    description:
+      type: text
+      label: 'Description'
+
+views.display.featured_content_block:
+  type: views.display.block
+  label: 'Featured content block display options'
+  mapping:
+    featured_content_type:
+      type: string
+      label: 'Featured content type'

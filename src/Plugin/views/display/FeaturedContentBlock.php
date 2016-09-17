@@ -1,15 +1,13 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\Plugin\views\display\FeaturedContentBlock.
- */
-
 namespace Drupal\featured_content\Plugin\views\display;
 
+use Drupal\Component\Plugin\PluginInspectionInterface;
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\featured_content\Entity\FeaturedContent;
+use Drupal\featured_content\Entity\FeaturedContentType;
 use Drupal\views\Plugin\views\display\Block;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -53,7 +51,7 @@ class FeaturedContentBlock extends Block {
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager.
    * @param \Drupal\Core\Routing\RouteMatchInterface $current_route_match
-   *   The currentroute match service.
+   *   The current route match service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityManagerInterface $entity_manager, RouteMatchInterface $current_route_match) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_manager);
@@ -76,14 +74,93 @@ class FeaturedContentBlock extends Block {
   /**
    * {@inheritdoc}
    */
+  public function defineOptions() {
+    return [
+      'featured_content_type' => ['default' => NULL]
+    ] + parent::defineOptions();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function blockSettings(array $settings) {
     return parent::blockSettings($settings) + [
-      // There's no way to access the view and the display from the block.
-      // We store the display plugin id in block settings to be used later by
-      // the block plugin for identifying this display plugin.
-      // @see featured_content_block_view_alter().
-      'featured_content_display_plugin_id' => $this->getPluginDefinition()['id'],
+      'featured_content_type' => $this->getOption('featured_content_type'),
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function optionsSummary(&$categories, &$options) {
+    parent::optionsSummary($categories, $options);
+
+    $label = $this->t('None');
+    if ($id = $this->getOption('featured_content_type')) {
+      $label = FeaturedContentType::load($id)->label();
+    }
+
+    $options['featured_content_type'] = array(
+      'category' => 'block',
+      'title' => $this->t('Featured content type'),
+      'value' => $label,
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildOptionsForm(&$form, FormStateInterface $form_state) {
+    parent::buildOptionsForm($form, $form_state);
+    if ($form_state->get('section') == 'featured_content_type') {
+      $options = [];
+      foreach (FeaturedContentType::loadMultiple() as $id => $type) {
+        $options[$id] = $type->label();
+      }
+      $form['#title'] .= $this->t('Featured contrent type');
+      $form['featured_content_type'] = array(
+        '#type' => 'select',
+        '#options' => $options,
+        '#description' => $this->t('Select the featured content type to be used.'),
+        '#default_value' => $this->getOption('featured_content_type'),
+      );
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateOptionsForm(&$form, FormStateInterface $form_state) {
+    parent::validateOptionsForm($form, $form_state);
+    if ($form_state->get('section') == 'featured_content_type') {
+      $type = $form_state->getValue('featured_content_type');
+      if (empty($type) || empty(FeaturedContentType::load($type))) {
+        $form_state->setError($form['featured_content_type'], $this->t('A featured content type should be configured for this type of display.'));
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitOptionsForm(&$form, FormStateInterface $form_state) {
+    parent::submitOptionsForm($form, $form_state);
+    $section = $form_state->get('section');
+    if ($section == 'featured_content_type') {
+      $this->setOption($section, $form_state->getValue($section));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validate() {
+    $errors = parent::validate();
+    $type = $this->getOption('featured_content_type');
+    if (empty($type) || empty(FeaturedContentType::load($type))) {
+      $errors[] = $this->t('A featured content type should be configured for this type of display.');
+    }
+    return $errors;
   }
 
   /**
@@ -92,14 +169,17 @@ class FeaturedContentBlock extends Block {
   public function query() {
     /** @var \Drupal\taxonomy\TermInterface $term */
     $term = $this->currentRouteMatch->getParameter('taxonomy_term');
-    if (empty($term)) {
+    if ($type_id = $this->getOption('featured_content_type')) {
+      $type = FeaturedContentType::load($type_id);
+    }
+    if (empty($term) || empty($type)) {
       $this->view->query->addWhereExpression(0, '1 = 2');
       return;
     }
 
     $plugin_id = 'views_block:' . $this->view->storage->id() . '-' . $this->display['id'];
 
-    $featured_content = FeaturedContent::loadByContext($plugin_id, $term->id());
+    $featured_content = FeaturedContent::loadByContext($type->id(), $plugin_id, $term->id());
     if (!$featured_content) {
       $this->view->query->addWhereExpression(0, '1 = 2');
       return;
@@ -139,7 +219,20 @@ class FeaturedContentBlock extends Block {
     // This block cache should be cleared when the corresponding featured
     // content entity is saved.
     $this->display['cache_metadata']['tags'][] = "featured_content:{$featured_content->id()}";
+    $this->display['cache_metadata']['tags'][] = "featured_content_type:{$featured_content->bundle()}";
     $this->display['cache_metadata']['contexts'][] = 'route.taxonomy_term';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculatePluginDependencies(PluginInspectionInterface $instance) {
+    parent::calculatePluginDependencies($instance);
+    if ($type_id = $this->getOption('featured_content_type')) {
+      if ($type = FeaturedContentType::load($type_id)) {
+        $this->addDependency($type->getConfigDependencyKey(), $type->getConfigDependencyName());
+      }
+    }
   }
 
 }

@@ -1,12 +1,36 @@
-featured_content.ui:
+entity.featured_content_type.collection:
   path: '/admin/structure/featured-content'
   defaults:
-    _controller: '\Drupal\featured_content\Controller\FeaturedContentAdmin::overview'
-    _title: 'Featured content'
+    _entity_list: 'featured_content_type'
+    _title: 'Featured content types'
   requirements:
-    _permission: 'administer site configuration'
+    _permission: 'administer featured content'
+
+feature_content.type_add:
+  path: '/admin/structure/featured-content/add'
+  defaults:
+    _entity_form: 'featured_content_type.add'
+    _title: 'Add featured content type'
+  requirements:
+    _permission: 'administer featured content'
+
+entity.featured_content_type.edit_form:
+  path: '/admin/structure/featured-content/manage/{featured_content_type}'
+  defaults:
+    _entity_form: 'featured_content_type.edit'
+  requirements:
+    _permission: 'administer featured content'
+
+entity.featured_content_type.delete_form:
+  path: '/admin/structure/featured-content/manage/{featured_content_type}/delete'
+  defaults:
+    _entity_form: 'featured_content_type.delete'
+    _title: 'Delete'
+  requirements:
+    _permission: 'administer featured content'
+
 featured_content.edit_content:
-  path: '/featured-content/{views_block_plugin}/{taxonomy_term}'
+  path: '/featured-content/{featured_content_type}/{views_block_plugin}/{taxonomy_term}'
   defaults:
     _entity_form: 'featured_content.default'
     _title: 'Edit content'
@@ -16,6 +40,8 @@ featured_content.edit_content:
   options:
     _admin_route: TRUE
     parameters:
+      featured_content_type:
+        type: 'entity:featured_content_type'
       views_block_plugin:
         type: views_block_plugin
       taxonomy_term:

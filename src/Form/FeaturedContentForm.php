@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\Form\FeaturedContentForm.
- */
-
 namespace Drupal\featured_content\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
@@ -21,6 +16,9 @@ class FeaturedContentForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function getEntityFromRouteMatch(RouteMatchInterface $route_match, $entity_type_id) {
+    /** @var \Drupal\featured_content\Entity\FeaturedContentType $type */
+    $type = $route_match->getParameter('featured_content_type');
+
     /** @var \Drupal\Core\Block\BlockPluginInterface $block_plugin */
     $block_plugin = $route_match->getParameter('views_block_plugin');
     $block_plugin_id = $block_plugin->getPluginId();
@@ -28,9 +26,10 @@ class FeaturedContentForm extends ContentEntityForm {
     /** @var \Drupal\taxonomy\TermInterface $term */
     $term = $route_match->getParameter('taxonomy_term');
 
-    $featured_content = FeaturedContent::loadByContext($block_plugin_id, $term->id());
+    $featured_content = FeaturedContent::loadByContext($type->id(), $block_plugin_id, $term->id());
     if (!$featured_content) {
       $featured_content = FeaturedContent::create([
+        'type' => $type->id(),
         'block_plugin' => $block_plugin_id,
         'term' => $term->id(),
         'uid' => $this->currentUser()->id(),

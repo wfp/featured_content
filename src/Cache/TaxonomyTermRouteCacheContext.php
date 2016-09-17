@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\Cache\TaxonomyTermRouteCacheContext.
- */
-
 namespace Drupal\featured_content\Cache;
 
 use Drupal\Core\Cache\Context\RouteCacheContext;

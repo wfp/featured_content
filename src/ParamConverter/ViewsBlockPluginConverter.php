@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\featured_content\ParamConverter\ViewsBlockPluginConverter.
- */
-
 namespace Drupal\featured_content\ParamConverter;
 
 use Drupal\Core\Block\BlockManagerInterface;
@@ -39,7 +34,7 @@ class ViewsBlockPluginConverter implements ParamConverterInterface {
    */
   public function convert($value, $definition, $name, array $defaults) {
     /** @var \Drupal\Core\Block\BlockPluginInterface $plugin */
-    if ($plugin = $this->blockPluginManager->createInstance($value)) {
+    if ($plugin = $this->blockPluginManager->createInstance("views_block:$value")) {
       if ($plugin->getBaseId() === 'views_block') {
         // Get the view and display ID.
         list($view_id, $display_id) = explode('-', $plugin->getDerivativeId(), 2);
