@@ -5,11 +5,10 @@ namespace Drupal\featured_content\Form;
 use Drupal\Core\Entity\BundleEntityFormBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\featured_content\Entity\FeaturedContentType;
 
 /**
- * Provided a form for editing featured content type entities.
+ * Provides a form for editing featured content type entities.
  */
 class FeaturedContentTypeEdit extends BundleEntityFormBase {
 

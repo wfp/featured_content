@@ -15,7 +15,7 @@ use Drupal\featured_content\FeaturedContentTypeInterface;
  *     "form" = {
  *       "add" = "Drupal\featured_content\Form\FeaturedContentTypeEdit",
  *       "edit" = "Drupal\featured_content\Form\FeaturedContentTypeEdit",
- *       "delete" = "Drupal\featured_content\Form\FeaturedContentTypeDeleteConfirm",
+ *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
  *     },
  *     "list_builder" = "Drupal\featured_content\FeaturedContentTypeListBuilder",
  *   },

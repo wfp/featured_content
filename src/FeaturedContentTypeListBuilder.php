@@ -6,7 +6,7 @@ use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 
 /**
- * provides a list builder for featured_content_type entities.
+ * Provides a list builder for featured_content_type entities.
  */
 class FeaturedContentTypeListBuilder extends ConfigEntityListBuilder {
 
