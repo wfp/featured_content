@@ -12,5 +12,5 @@ cardinality: 1
 indexes:
   target_id:
     - target_id
-persist_with_no_fields: false
+persist_with_no_fields: true
 custom_storage: false

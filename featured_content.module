@@ -5,13 +5,9 @@
  * Contains featured_content.module.
  */
 
-use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\featured_content\Entity\FeaturedContentType;
-use Drupal\field\Entity\FieldStorageConfig;
-use Drupal\field\Entity\FieldConfig;
 
 /**
  * Implements hook_help().
@@ -62,64 +58,5 @@ function featured_content_config_schema_info_alter(&$definitions) {
   $definitions['views_block']['mapping']['featured_content_type'] = [
     'type' => 'string',
     'label' => 'Feature content type',
-  ];
-}
-
-/**
- * Implements hook_ENTITY_TYPE_insert() for featured_content_type entities.
- */
-function featured_content_featured_content_type_insert(EntityInterface $type) {
-  foreach (featured_content_get_field_definition() as $id => $definition) {
-    $field_storage = FieldStorageConfig::loadByName('featured_content', $id);
-    $field = FieldConfig::loadByName('featured_content', $type->id(), $id);
-    if (empty($field)) {
-      $field = FieldConfig::create([
-        'field_storage' => $field_storage,
-        'bundle' => $type->id(),
-        'label' => $definition['label'],
-        'required' => $definition['required'],
-        'settings' => $definition['settings'],
-      ]);
-      $field->save();
-    }
-  }
-
-  $display = EntityFormDisplay::load("featured_content.{$type->id()}.default");
-  if (!$display) {
-    $display = EntityFormDisplay::create([
-      'targetEntityType' => 'featured_content',
-      'bundle' => $type->id(),
-      'mode' => 'default',
-      'status' => TRUE,
-    ]);
-  }
-  $display
-    ->setComponent('content', ['type' => 'entity_reference_autocomplete'])
-    ->save();
-}
-
-/**
- * Provides initial field config definitions.
- *
- * @return array
- */
-function featured_content_get_field_definition() {
-  return [
-    'term' => [
-      'label' => t('Taxonomy term'),
-      'required' => TRUE,
-      'settings' => [
-        'handler' => 'default:taxonomy_term',
-        'handler_settings' => [],
-      ],
-    ],
-    'content' => [
-      'label' => t('Content'),
-      'required' => TRUE,
-      'settings' => [
-        'handler' => 'default',
-        'handler_settings' => [],
-      ],
-    ],
   ];
 }
